@@ -67,15 +67,19 @@ fn cli() -> Command {
 
 fn main() {
     let matches = cli().get_matches();
-    let file_path = matches.get_one::<String>("IMG").expect("Couldn't get image path.");
-    let palette_colors = matches.get_one::<u8>("NUM").expect("Couldn't get number of colors.");
-    let palette_path = matches.get_one::<String>("PAL").expect("Couldn't get palette path.");
+    let file_path = matches.get_one::<String>("IMG").expect("Couldn't parse image path.");
+    let palette_colors = matches.get_one::<u8>("NUM").expect("Couldn't parse number of colors.");
+    let palette_path = matches.get_one::<String>("PAL").expect("Couldn't parse palette path.");
     let mut image_tuple = load_file(&file_path).expect("Couldn't open file");
     let user_palette_result = setup_palette(palette_path);
     let user_palette = match user_palette_result {
         Ok(user_palette) => user_palette,
         Err(_) =>  get_colors(&mut image_tuple.0,*palette_colors), // No file specified or found? Use colors from the image.
     };
+    println!("Current palette colors:");
+    for color in user_palette {
+      println!("#{:x}{:x}{:x}",color.r,color.g,color.b);
+    }
     let image_width = image_tuple.2 as usize;
     let image_height = image_tuple.1 as usize;
     let mut buffer = vec![0u32; image_width * image_height];
@@ -109,7 +113,8 @@ fn main() {
             size = new_size;
             buffer.resize(size.0 * size.1, 0);
         }
-        // buffer update logic goes here
+        // buffer update logic goes here.
+        // The idea that I have is to iterate through both the dithered image and the original to show the changes line by line, rather than having it be a "real-time" thing.
         window
             .update_with_buffer(&buffer, new_size.0, new_size.1)
             .unwrap();
