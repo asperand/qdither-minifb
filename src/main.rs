@@ -86,7 +86,7 @@ fn main() {
         image_height,
         WindowOptions {
             resize: true,
-            scale_mode: ScaleMode::UpperLeft,
+            scale_mode: ScaleMode::Center,
             ..WindowOptions::default()
         },
     )
@@ -95,7 +95,8 @@ fn main() {
     window.set_target_fps(60);
 
     let mut size = (0, 0);
-
+    let dithered_image = dither_image_fs(&mut image_tuple.0,image_tuple.2,image_tuple.1,user_palette);
+    buffer = convert_rgb8_to_buf32(dithered_image);
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let new_size = window.get_size();
         if new_size != size {
@@ -308,7 +309,9 @@ fn get_colors(image:&mut Vec<RGB<u8>>, palette_colors:u8) -> Vec<RGB<u8>> {
 fn convert_rgb8_to_buf32(image_rgb_vec:Vec<RGB<u8>>) -> Vec<u32> {
     let mut buf32 = Vec::new();
     for pixel in image_rgb_vec {
-        let rgba_pixel : u32 = (pixel.r << 24) | (pixel.g << 16) | (pixel.b << 8) | 255;
+        let rgba_pixel = u32::from(pixel.r) << 16
+        | u32::from(pixel.g) << 8 
+        | u32::from(pixel.b);
         buf32.push(rgba_pixel);
     }
     return buf32
