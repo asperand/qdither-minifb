@@ -76,10 +76,12 @@ fn main() {
         Ok(user_palette) => user_palette,
         Err(_) =>  get_colors(&mut image_tuple.0,*palette_colors), // No file specified or found? Use colors from the image.
     };
+    /* Commenting out pretty printing for now.
     println!("Current palette colors:");
-    for color in user_palette {
+    for color in &user_palette {
       println!("#{:x}{:x}{:x}",color.r,color.g,color.b);
     }
+    */
     let image_width = image_tuple.2 as usize;
     let image_height = image_tuple.1 as usize;
     let mut buffer = vec![0u32; image_width * image_height];
@@ -100,7 +102,7 @@ fn main() {
 
     let mut size = (0, 0);
     let dithered_image = dither_image_fs(&mut image_tuple.0,image_tuple.2,image_tuple.1,user_palette);
-    let new_raw = to_raw_from_rgb(dithered_image);
+    let new_raw = to_raw_from_rgb(dithered_image.clone());
     let new_buffer: ImageBuffer<Rgb<u8>, _> = ImageBuffer::from_raw(image_tuple.2,image_tuple.1,new_raw).unwrap();
     match new_buffer.save("./dither.png") {
         Err(_) => println!("Couldn't save image buffer"),
