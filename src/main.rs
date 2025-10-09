@@ -96,6 +96,12 @@ fn main() {
 
     let mut size = (0, 0);
     let dithered_image = dither_image_fs(&mut image_tuple.0,image_tuple.2,image_tuple.1,user_palette);
+    let new_raw = to_raw_from_rgb(dithered_image);
+    let new_buffer: ImageBuffer<Rgb<u8>, _> = ImageBuffer::from_raw(image_tuple.2,image_tuple.1,new_raw).unwrap();
+    match new_buffer.save("./dither.png") {
+        Err(_) => println!("Couldn't save image buffer"),
+        Ok(_) => println!("Saved image buffer to dither.png"),
+    };
     buffer = convert_rgb8_to_buf32(dithered_image);
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let new_size = window.get_size();
