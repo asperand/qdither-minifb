@@ -76,8 +76,8 @@ fn main() {
         Ok(user_palette) => user_palette,
         Err(_) =>  get_colors(&mut image_tuple.0,*palette_colors), // No file specified or found? Use colors from the image.
     };
-    let image_width = image_tuple.2;
-    let image_height = image_tuple.1;
+    let image_width = image_tuple.2 as usize;
+    let image_height = image_tuple.1 as usize;
     let mut buffer = vec![0u32; image_width * image_height];
 
     let mut window = Window::new(
@@ -102,9 +102,7 @@ fn main() {
             size = new_size;
             buffer.resize(size.0 * size.1, 0);
         }
-
-        buffer = 
-
+        // buffer update logic goes here
         window
             .update_with_buffer(&buffer, new_size.0, new_size.1)
             .unwrap();
@@ -307,7 +305,7 @@ fn get_colors(image:&mut Vec<RGB<u8>>, palette_colors:u8) -> Vec<RGB<u8>> {
    return new_cent_vec;
 }
 
-fn convert_rgb8_to_buf32(image_rgb_vec:Vec<RGB<u8>>) -> vec<u32> {
+fn convert_rgb8_to_buf32(image_rgb_vec:Vec<RGB<u8>>) -> Vec<u32> {
     let mut buf32 = Vec::new();
     for pixel in image_rgb_vec {
         let rgba_pixel = (pixel.r << 24) | (pixel.g << 16) | (pixel.b << 8) | 255;
