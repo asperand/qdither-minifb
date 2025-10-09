@@ -308,7 +308,7 @@ fn get_colors(image:&mut Vec<RGB<u8>>, palette_colors:u8) -> Vec<RGB<u8>> {
 fn convert_rgb8_to_buf32(image_rgb_vec:Vec<RGB<u8>>) -> Vec<u32> {
     let mut buf32 = Vec::new();
     for pixel in image_rgb_vec {
-        let rgba_pixel = (pixel.r << 24) | (pixel.g << 16) | (pixel.b << 8) | 255;
+        let rgba_pixel : u32 = (pixel.r << 24) | (pixel.g << 16) | (pixel.b << 8) | 255;
         buf32.push(rgba_pixel);
     }
     return buf32
