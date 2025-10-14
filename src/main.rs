@@ -71,6 +71,7 @@ fn main() {
     let palette_colors = matches.get_one::<u8>("NUM").expect("Couldn't parse number of colors.");
     let palette_path = matches.get_one::<String>("PAL").expect("Couldn't parse palette path.");
     let mut image_tuple = load_file(&file_path).expect("Couldn't open file");
+    let undithered_image = image_tuple.0.clone();
     let user_palette_result = setup_palette(palette_path);
     let user_palette = match user_palette_result {
         Ok(user_palette) => user_palette,
@@ -108,21 +109,25 @@ fn main() {
         Err(_) => println!("Couldn't save image buffer"),
         Ok(_) => println!("Saved image buffer to dither.png"),
     };
-    buffer = convert_rgb8_to_buf32(dithered_image);
+    buffer = convert_rgb8_to_buf32(undithered_image);
+    let dithered_buffer = convert_rgb8_to_buf32(dithered_image);
+    let mut i = 0;
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let new_size = window.get_size();
         if new_size != size {
             size = new_size;
             buffer.resize(size.0 * size.1, 0);
         }
-        // buffer update logic goes here.
-        // The idea that I have is to iterate through both the dithered image and the original to show the changes line by line, rather than having it be a "real-time" thing.
+        if i<=buffer.len(){ // as long as we are within the range of the vec still, show the replacement that happened from the dithering.
+            for i in i..(i+image_tuple.2 as usize){ // "prints" per-line rather than per pixel
+                buffer[i] = dithered_buffer[i];
+            }
+            i+=image_tuple.2 as usize;
+        }
         window
             .update_with_buffer(&buffer, new_size.0, new_size.1)
             .unwrap();
-    }
-
-    
+    }    
 }
 
 /// Set up a vector of RGB values from a text-based palette file.
