@@ -323,7 +323,7 @@ fn get_colors(image:&mut Vec<RGB<u8>>, palette_colors:u8) -> Vec<RGB<u8>> {
    }
    return new_cent_vec;
 }
-
+/// Helper function to convert a vec of RGB values to the 0RGB format MiniFB needs
 fn convert_rgb8_to_buf32(image_rgb_vec:Vec<RGB<u8>>) -> Vec<u32> {
     let mut buf32 = Vec::new();
     for pixel in image_rgb_vec {
