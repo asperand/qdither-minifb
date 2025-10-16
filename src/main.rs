@@ -88,20 +88,29 @@ fn main() {
     let mut buffer = vec![0u32; image_width * image_height];
 
     let mut window = Window::new(
-        "qdither - Press Esc to stop",
+        "qdither - Press Esc to close the visual",
         image_width,
         image_height,
         WindowOptions {
-            resize: true,
+            resize: false,
             scale_mode: ScaleMode::Center,
             ..WindowOptions::default()
         },
     )
     .expect("Unable to create the window");
 
-    window.set_target_fps(60);
-
-    let mut size = (0, 0);
+    if image_width * image_height < 480000 { // Small image? Slow down the framerate so we can actually see the scanning
+        window.set_target_fps(60);
+    }
+    else if image_width * image_height > 2073600  { // anything over 1080p resolution can be sped up significantly
+        window.set_target_fps(240);
+    }
+    else if image_width * image_height > 8294400 { // anything over 4k resolution, uncap the framerate
+        window.set_target_fps(0);
+    }
+    else { // Otherwise, let's stick with 60fps.
+        window.set_target_fps(120);
+    }
     let dithered_image = dither_image_fs(&mut image_tuple.0,image_tuple.2,image_tuple.1,user_palette);
     let new_raw = to_raw_from_rgb(dithered_image.clone());
     let new_buffer: ImageBuffer<Rgb<u8>, _> = ImageBuffer::from_raw(image_tuple.2,image_tuple.1,new_raw).unwrap();
@@ -113,19 +122,14 @@ fn main() {
     let dithered_buffer = convert_rgb8_to_buf32(dithered_image);
     let mut i = 0;
     while window.is_open() && !window.is_key_down(Key::Escape) {
-        let new_size = window.get_size();
-        if new_size != size {
-            size = new_size;
-            buffer.resize(size.0 * size.1, 0);
-        }
-        if i<=buffer.len(){ // as long as we are within the range of the vec still, show the replacement that happened from the dithering.
+        if i<buffer.len(){ // as long as we are within the range of the vec still, show the replacement that happened from the dithering.
             for i in i..(i+image_tuple.2 as usize){ // "prints" per-line rather than per pixel
                 buffer[i] = dithered_buffer[i];
             }
             i+=image_tuple.2 as usize;
         }
         window
-            .update_with_buffer(&buffer, new_size.0, new_size.1)
+            .update_with_buffer(&buffer, image_width, image_height)
             .unwrap();
     }    
 }
